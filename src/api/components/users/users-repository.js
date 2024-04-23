@@ -71,6 +71,15 @@ async function getUserByEmail(email) {
   return User.findOne({ email });
 }
 
+/** 
+ * Get user by name 
+ * @param {string} name - Name
+ * @returns {Promise}
+ */
+async function getUserByName(name){
+  return User.findOne({name});
+}
+
 /**
  * Update user password
  * @param {string} id - User ID
@@ -88,5 +97,6 @@ module.exports = {
   updateUser,
   deleteUser,
   getUserByEmail,
+  getUserByName,
   changePassword,
 };

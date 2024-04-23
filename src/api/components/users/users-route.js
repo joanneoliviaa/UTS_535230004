@@ -24,6 +24,9 @@ module.exports = (app) => {
   // Get user detail
   route.get('/:id', authenticationMiddleware, usersControllers.getUser);
 
+  //Get list of users based on user's search
+  route.get('/', authenticationMiddleware, usersControllers.getUsersByQuery);
+
   // Update user
   route.put(
     '/:id',

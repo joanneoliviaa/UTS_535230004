@@ -18,6 +18,28 @@ async function getUsers(request, response, next) {
 }
 
 /**
+ * Handle get list of users based on user's search
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ */
+async function getUsersByQuery(request, response, next) {
+  try{
+    const{
+      name,
+      email
+    } = request.query;
+
+    const users = await usersService.getUsersWithQuery(name,email);
+
+    return response.status(200).json(users);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+/**
  * Handle get user detail request
  * @param {object} request - Express request object
  * @param {object} response - Express response object
@@ -192,6 +214,7 @@ async function changePassword(request, response, next) {
 module.exports = {
   getUsers,
   getUser,
+  getUsersByQuery,
   createUser,
   updateUser,
   deleteUser,

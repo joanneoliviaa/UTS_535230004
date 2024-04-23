@@ -1,4 +1,5 @@
 const usersRepository = require('./users-repository');
+const { errorResponder, errorTypes } = require('../../../core/errors');
 const { hashPassword, passwordMatched } = require('../../../utils/password');
 
 /**
@@ -19,6 +20,38 @@ async function getUsers() {
   }
 
   return results;
+}
+
+/** Get a list of users with query
+ * @returns {Array}
+ */
+async function getUsersWithQuery(query){
+  try{
+    const userByEmail = await usersRepository.getUserByEmail(query);
+    const userByName = await usersRepository.getUserByName(query);
+
+    let userFromQuery = [];
+
+    if(userByEmail && userByEmail.length > 0){
+      userFromQuery = userFromQuery.concat(userByEmail.map(user=>({
+        id: user.id,
+        name: user.name,
+        email:user.email,
+    })));
+  }
+
+    if(userByName && userByName.length > 0){
+      userFromQuery = userFromQuery.concat(userByName.map(user=>({
+        id: user.id,
+        name:user.name,
+        email: user.email,
+  })));
+  }
+
+  return userFromQuery;
+} catch(error){
+  throw error;
+}
 }
 
 /**
@@ -164,6 +197,7 @@ async function changePassword(userId, password) {
 module.exports = {
   getUsers,
   getUser,
+  getUsersWithQuery,
   createUser,
   updateUser,
   deleteUser,

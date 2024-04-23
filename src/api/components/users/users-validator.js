@@ -2,6 +2,18 @@ const joi = require('joi');
 const { joiPasswordExtendCore } = require('joi-password');
 const joiPassword = joi.extend(joiPasswordExtendCore);
 
+/** Handle validation of query params
+ * 
+ */
+function validasiParams(params){
+  const schema = joi.object({
+    page_number: joi.number().integer().min(1).default(1).label('page_number'),
+    page_size: joi.number().integer().min(1).default(100).label('page_size'),
+  });
+
+  return schema.validate(params);
+}
+
 module.exports = {
   createUser: {
     body: {
@@ -48,4 +60,5 @@ module.exports = {
       password_confirm: joi.string().required().label('Password confirmation'),
     },
   },
+  validasiParams,
 };
