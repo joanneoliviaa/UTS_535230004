@@ -1,14 +1,16 @@
 const authenticationRepository = require('./authentication-repository');
 const { generateToken } = require('../../../utils/session-token');
 const { passwordMatched } = require('../../../utils/password');
+const { errorResponder } = require('../../../core/errors');
 
 /**
  * Check username and password for login.
  * @param {string} email - Email
  * @param {string} password - Password
+ * @param {number} attempt - Attempt of login
  * @returns {object} An object containing, among others, the JWT token if the email and password are matched. Otherwise returns null.
  */
-async function checkLoginCredentials(email, password) {
+async function checkLoginCredentials(email, password, attempt) {
   const user = await authenticationRepository.getUserByEmail(email);
 
   // We define default user password here as '<RANDOM_PASSWORD_FILTER>'
@@ -28,8 +30,9 @@ async function checkLoginCredentials(email, password) {
       user_id: user.id,
       token: generateToken(user.email, user.id),
     };
+  } else if (!passwordMatched && attempt > 5){
+    throw errorResponder(errorTypes.FORBIDDEN, 'Too many failed login attempts.');
   }
-
   return null;
 }
 

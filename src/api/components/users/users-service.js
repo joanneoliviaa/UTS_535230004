@@ -1,7 +1,7 @@
 const usersRepository = require('./users-repository');
 const { errorResponder, errorTypes } = require('../../../core/errors');
 const { hashPassword, passwordMatched } = require('../../../utils/password');
-
+const MongoClient = require('mongodb').MongoClient;
 /**
  * Get list of users
  * @returns {Array}
@@ -25,34 +25,48 @@ async function getUsers() {
 /** Get a list of users with query
  * @returns {Array}
  */
-async function getUsersWithQuery(query){
-  try{
-    const userByEmail = await usersRepository.getUserByEmail(query);
-    const userByName = await usersRepository.getUserByName(query);
+async function searchDocuments(field, sortOrder) {
+  const uri = 'mongodb://localhost:27017'; // URI koneksi MongoDB
+  const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
-    let userFromQuery = [];
+  try {
+      await client.connect(); // Menghubungkan ke MongoDB
 
-    if(userByEmail && userByEmail.length > 0){
-      userFromQuery = userFromQuery.concat(userByEmail.map(user=>({
-        id: user.id,
-        name: user.name,
-        email:user.email,
-    })));
+      const database = client.db('nama_database'); // Nama database
+      const collection = database.collection('nama_collection'); // Nama collection
+
+      // Membuat objek sort
+      let sort = {};
+      if (field && sortOrder) {
+          sort[field] = sortOrder === 'asc' ? 1 : -1;
+      } else {
+          // Jika format pencarian salah atau tidak diisi, kembalikan array kosong
+          return [];
+      }
+
+      // Membuat query pencarian
+      const query = {};
+
+      // Mencari dokumen dengan sort order yang ditentukan
+      const result = await collection.find(query).sort(sort).toArray();
+      
+      return result;
+  } catch (error) {
+      console.error("Error during search:", error);
+      return [];
+  } finally {
+      await client.close(); // Menutup koneksi MongoDB
   }
-
-    if(userByName && userByName.length > 0){
-      userFromQuery = userFromQuery.concat(userByName.map(user=>({
-        id: user.id,
-        name:user.name,
-        email: user.email,
-  })));
-  }
-
-  return userFromQuery;
-} catch(error){
-  throw error;
 }
-}
+
+// Contoh pemanggilan fungsi pencarian
+searchDocuments('nama_field', 'asc')
+  .then(result => {
+      console.log("Search result:", result);
+  })
+  .catch(error => {
+      console.error("Error:", error);
+  });
 
 /**
  * Get user detail

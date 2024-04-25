@@ -60,5 +60,4 @@ module.exports = {
       password_confirm: joi.string().required().label('Password confirmation'),
     },
   },
-  validasiParams,
 };
